@@ -1,0 +1,28 @@
+{#
+AmazonPay for EC-CUBE4
+Copyright(c) 2018 IPLOGIC CO.,LTD. All Rights Reserved.
+
+http://www.iplogic.co.jp/
+
+This program is not free software.
+It applies to terms of service.
+#}
+
+<style>
+    .AmazonPayButton {
+        margin: 10px;
+    }
+</style>
+{% for CartIndex,Cart in Carts %}
+    {% set cartKey = Cart.cart_key %}
+    <div class="d-none">
+        <p id="AmazonPayButton{{ cartKey }}" class="AmazonPayButton"></p>
+    </div>
+
+    <script>
+        $(function () {
+            // ボタンを設置
+            $('#form_cart > div.ec-cartRole__actions').eq("{{ loop.index0 }}").append($("#AmazonPayButton{{ cartKey }}"));
+        });
+    </script>
+{% endfor %}

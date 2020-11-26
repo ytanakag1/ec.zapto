@@ -1,0 +1,47 @@
+{#
+AmazonPay for EC-CUBE4
+Copyright(c) 2018 IPLOGIC CO.,LTD. All Rights Reserved.
+
+http://www.iplogic.co.jp/
+
+This program is not free software.
+It applies to terms of service.
+#}
+
+<style>
+    .AmazonLoginButton {
+        margin: auto;
+        width: max-content !important;
+        width: -moz-max-content !important;
+        width: -webkit-max-content !important;
+
+        display: -webkit-flex;
+        display: flex;
+        -webkit-justify-content: center;
+        justify-content: center;
+        -webkit-align-items: stretch;
+        align-items: stretch;
+    }
+</style>
+
+<script>
+    $(function () {
+        // ボタンを設置
+        $("div.ec-borderedDefs").prepend($("dl.dl_AmazonLogin"));
+    });
+</script>
+
+<div class="d-none">
+    <dl class="dl_AmazonLogin">
+        <dt>
+            <div class="d-inline-block" data-tooltip="true" data-placement="top"
+                title="{{ 'amazon_pay.front.connect_amazon_acount_info'|trans }}">
+                <label class="ec-label">{{'amazon_pay.front.connet_amazon_account_title'|trans}}</label>
+                <i class="fa fa-question-circle fa-lg ml-1"></i>
+            </div>
+        </dt>
+        <dd>
+            <p id="AmazonLoginButton" class="AmazonLoginButton"></p>
+        </dd>
+    </dl>
+</div>

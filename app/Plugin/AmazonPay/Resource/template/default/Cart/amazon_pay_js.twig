@@ -1,0 +1,52 @@
+{#
+AmazonPay for EC-CUBE4
+Copyright(c) 2018 IPLOGIC CO.,LTD. All Rights Reserved.
+
+http://www.iplogic.co.jp/
+
+This program is not free software.
+It applies to terms of service.
+#}
+<script>
+window.onAmazonLoginReady = function() { amazon.Login.setClientId("{{ Config.client_id }}"); };
+</script>
+<script src="{{ AmazonApi.widget_url }}"></script>
+
+{% for CartIndex,Cart in Carts %}
+    {% set cartKey = Cart.cart_key %}
+    <div class="d-none">
+        <div id="AmazonPayJS{{ cartKey }}">
+            <script>
+                $(function(){ 
+                var authRequest;
+                OffAmazonPayments.Button("AmazonPayButton{{ cartKey }}", "{{ Config.seller_id }}", {
+                    type: "PwA",
+                    size: "{{ Config.cart_button_size }}",
+                    color: "{{ Config.cart_button_color }}",
+                    authorization: function() {
+                        {% set eccubePlatform = php_getenv('ECCUBE_PLATFORM') %}
+                        {% if eccubePlatform and eccubePlatform == 'ec-cube.co' %}
+                            {% set url = url('homepage') ~ "html/user_data/amazon_relay.html" %}
+                        {% else %}
+                            {% set url = url('homepage') ~ "amazon_relay.html" %}
+                        {% endif %}
+                        data = ["index={{ cartKey }}"];
+                        loginOptions = {scope: "profile payments:widget payments:shipping_address", popup: false, state: data};
+                        authRequest = amazon.Login.authorize (loginOptions, "{{ url }}");
+                    },
+                    onError: function(error) {
+                        alert('通信中にエラーが発生しました。カート画面に移動します。');
+                        location.href = "{{ url('cart') }}";
+                    }
+                });
+                });
+            </script>
+        </div>
+    </div>
+    <script>
+    $(function () {
+        // ボタンを設置
+        $('#form_cart > div.ec-cartRole__actions').eq("{{ loop.index0 }}").after($("#AmazonPayJS{{ cartKey }}"));
+    });
+</script>
+{% endfor %}

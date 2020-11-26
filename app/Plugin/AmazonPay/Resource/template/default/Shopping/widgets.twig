@@ -1,0 +1,252 @@
+{#
+AmazonPay for EC-CUBE4
+Copyright(c) 2018 IPLOGIC CO.,LTD. All Rights Reserved.
+
+http://www.iplogic.co.jp/
+
+This program is not free software.
+It applies to terms of service.
+#}
+
+
+<link rel="stylesheet" href="{{ asset('assets/css/amazon_shopping.css') }}">
+
+<div id="calculating" style="display:none;">
+    <p>金額の計算中です。</p>
+    </br>
+    <img src="//cdnjs.cloudflare.com/ajax/libs/galleriffic/2.0.1/css/loader.gif" style="width:40px;"/></br>
+</div>
+
+<div class="d-none">
+    <input type="hidden" name="amazonOrderReferenceId" id="amazonOrderReferenceId" value="" />
+    <input type="hidden" name="addressConsentToken" id="addressConsentToken" value="{{ addressConsentToken }}" />
+
+    <div id="amazon_payWidgetHeader" class="ec-rectHeading">
+        <h2>配送情報・お支払方法</h2>
+    </div>
+
+    <div id="amazon_payWidget">
+        <div id="amazon_payWidget__address">
+            <div class="ec-orderDelivery__title">お届け先</div>
+            <div id="addressBookWidgetDiv"></div>
+        </div>
+        <div id="amazon_payWidget__wallet">
+            <div class="ec-orderDelivery__title">お支払方法</div>
+            <div id="walletWidgetDiv"></div>
+        </div>
+    </div>
+</div>
+
+{% block javascript %}
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery.blockUI/2.70/jquery.blockUI.min.js"></script>
+<script>
+var amazon_submit_flag = false;
+
+function is_reload() {
+    var reload = false;
+    var data = {
+        amazonOrderReferenceId: $('#amazonOrderReferenceId').val(),
+        addressConsentToken: $('#addressConsentToken').val(),
+    }
+    $.ajax({
+        url: "{{ url("amazon_shopping_is_reload") }}",
+        type: 'GET',
+        dataType: 'json',
+        data: data,
+        async: false,
+        success: function(response) {
+            reload = response.is_reload;
+        },
+        error: function() {
+            alert('error')
+        }
+    });
+
+    return reload;
+}
+
+$(function () {
+    // submit
+    {% if Config.use_confirm_page == eccube_config.amazon_pay.toggle.on %}
+        $('#shopping-form').attr('action', '{{ url("amazon_shopping_confirm") }}')
+    {% elseif Order.postal_code == ' ' %}
+        alert('お客様情報登録に失敗しました。他のお届け先を選択してください。');
+        $('button.ec-blockBtn--action').text('注文する').prop( 'disabled', true );
+        $('button.ec-blockBtn--action').addClass('amazon_pay_button');
+        $('#shopping-form').attr('action', '{{ url("amazon_shopping_checkout") }}');
+    {% else %}
+        $('button.ec-blockBtn--action').text('注文する');
+        $('button.ec-blockBtn--action').addClass('amazon_pay_button');
+        $('#shopping-form').attr('action', '{{ url("amazon_shopping_checkout") }}');
+    {% endif %}
+
+    // イベント上書き
+    var $redirectCallbackAmazon = function () {
+        loadingOverlay();
+        $('#shopping_order_redirect_to').val($(this).attr('data-path'));
+        $('#shopping-form').attr('action', '{{ url("amazon_shopping_redirect_to") }}').submit();
+    };
+    $('[data-trigger]').each(function() {
+        $(this).off($(this).attr('data-trigger'));
+        $(this).on($(this).attr('data-trigger'), $redirectCallbackAmazon);
+    });
+
+
+    // parameter
+    $('#amazonOrderReferenceId').prependTo($('#shopping-form'));
+    $('#addressConsentToken').prependTo($('#shopping-form'));
+
+    // header
+    $('#amazon_payWidgetHeader').replaceAll($('div.ec-orderRole__detail > div.ec-orderDelivery > div.ec-rectHeading'));
+
+    // widget
+    $('#amazon_payWidget').replaceAll($('div.ec-orderRole__detail > div.ec-orderDelivery > div.ec-orderDelivery__title'));
+
+    // deliv addr
+    $('div.ec-orderRole__detail > div.ec-orderDelivery > div.ec-orderDelivery__address').remove();
+
+    // deliv edit
+    $('div.ec-orderRole__detail > div.ec-orderDelivery > div.ec-orderDelivery__edit').remove();
+
+    // payment
+    $('div.ec-orderRole__detail > div.ec-orderPayment').eq(0).hide();
+
+    $('#shopping-form').submit(function(e) {
+        $amazon_pay_button = $('.ec-blockBtn--action.amazon_pay_button');
+        // 2重クリック防止
+        $amazon_pay_button.prop('disabled', true);
+        if (amazon_submit_flag == false) {
+            e.preventDefault();
+            alert('お支払方法が確定していません。');
+            if ($('.bg-load-overlay').length !== 0) {
+                loadingOverlay('hide');
+            }
+            $amazon_pay_button.prop('disabled', false);
+        }
+    })
+
+    //スクロール処理上書き
+    $('.pagetop').hide();
+
+    $(window).on('scroll', function() {
+        // ページトップフェードイン
+        if ($(this).scrollTop() > 300) {
+            $('.pagetop').fadeIn();
+        } else {
+            $('.pagetop').fadeOut();
+        }
+
+        // PC表示の時のみに適用
+        if (window.innerWidth > 767) {
+
+            var side = $(".ec-orderRole__summary"),
+                wrap = $("#shopping-form"),
+                amazon_wrap = $('.amazon_customer_regist'),
+                min_move = wrap.offset().top,
+                max_move = wrap.height(),
+                amazon_move = amazon_wrap.height(),
+                margin_bottom = max_move - min_move;
+
+            var scrollTop = $(window).scrollTop();
+            if (scrollTop > min_move && scrollTop < max_move && amazon_move > 0) {
+                side.css({"margin-top": 0});
+            } else if (scrollTop > max_move) {
+                side.css({"margin-top": margin_bottom});
+            }
+        }
+    });
+});
+</script>
+
+<script>
+var accessToken = "{{ addressConsentToken }}";
+
+document.cookie = "amazon_Login_accessToken=" + accessToken + ";path=/;secure";
+window.onAmazonLoginReady = function() { amazon.Login.setClientId("{{ Config.client_id }}"); amazon.Login.setUseCookie(true); };
+window.onAmazonPaymentsReady = function () {
+    showAddressBookWidget()
+}
+</script>
+<script type='text/javascript'>
+function showAddressBookWidget() {
+    if ($('#calculating').css('display') != 'block') {
+        if ($.blockUI != undefined) {
+            $.blockUI({
+                message: $('#calculating'),
+                css :{
+                    'width': '500px',
+                    'margin': '10px',
+                    'padding': '20px 10px',
+                    'border': 'none',
+                    'border-radius': '15px',
+                    '-webkit-border-radius': '15px',
+                    '-moz-border-radius': '15px',
+                    'font-size': '120%',
+                    'font-family': 'Gothic Medium BBB',
+                    'left': 'calc((100% - 500px) / 2)',
+                    'box-sizing': 'border-box'
+                }
+            });
+            setTimeout($.unblockUI, 5000); 
+        }
+    }
+
+    var amazonOrderReferenceId;
+    new OffAmazonPayments.Widgets.AddressBook({
+        sellerId: "{{ Config.seller_id}}",
+        amazonOrderReferenceId: "{{ amazonOrderReferenceId }}",
+        design: {
+            size : {width:"{{ Config.deliv_widget_width }}px", height:"{{ Config.deliv_widget_height }}px"}
+        },
+        onOrderReferenceCreate: function (orderReference) {
+            var amazonOrderReferenceId = orderReference.getAmazonOrderReferenceId();
+            $("#amazonOrderReferenceId").val(amazonOrderReferenceId);
+            showWalletWidget(amazonOrderReferenceId);
+        },
+        onAddressSelect: function(orderReference) {
+            var reload = is_reload();
+            amazon_submit_flag = true;
+            if (reload == 'on') {
+                loadingOverlay();
+                $('#shopping_order_redirect_to').val('/amazon_shopping/address');
+                $('#shopping-form').attr('action', '{{ url("amazon_shopping_redirect_to") }}').submit();
+            }
+        },
+        onError: function(error) {
+            if (error.getErrorCode() == 'ITP') {
+                return;
+            }
+            alert("通信中にエラーが発生しました。カート画面に移動します。");
+            loadingOverlay();
+            location.href = "{{ url('cart') }}";
+        }
+    }).bind("addressBookWidgetDiv");
+}
+
+
+    function showWalletWidget(orderReferenceId) {
+        new OffAmazonPayments.Widgets.Wallet({
+            sellerId: "{{ Config.seller_id }}",
+            design: {
+                size : {width:"{{ Config.payment_widget_width }}px", height:"{{ Config.payment_widget_height }}px"}
+            },
+            onPaymentSelect: function(orderReference) {
+                amazon_submit_flag = true;
+                if ($.unblockUI != undefined) {
+                    $.unblockUI();
+                }
+            },
+            onError: function(error) {
+                if (error.getErrorCode() == 'ITP') {
+                    return;
+                }
+                alert("通信中にエラーが発生しました。カート画面に移動します。");
+                loadingOverlay();
+                location.href = "{{ url('cart') }}";
+            }
+        }).bind("walletWidgetDiv");
+    }
+</script>
+
+<script type="text/javascript" async="async" src="{{ AmazonApi.widget_url }}"></script>
+{% endblock %}

@@ -1,0 +1,63 @@
+{#
+AmazonPay for EC-CUBE4
+Copyright(c) 2018 IPLOGIC CO.,LTD. All Rights Reserved.
+
+http://www.iplogic.co.jp/
+
+This program is not free software.
+It applies to terms of service.
+#}
+
+<style>
+    .div_AmazonLogin {
+        margin-top: 20px;
+    }
+    .AmazonLoginButton {
+        margin: auto;
+        width: max-content !important;
+        width: -moz-max-content !important;
+        width: -webkit-max-content !important;
+
+        display: -webkit-flex;
+        display: flex;
+        -webkit-justify-content: center;
+        justify-content: center;
+        -webkit-align-items: stretch;
+        align-items: stretch;
+    }
+</style>
+
+<script>
+    $(function () {
+        // ボタンを設置
+        $("div.ec-grid2").after($(".div_AmazonLogin"));
+
+        var arr_query = getUrlVars();
+        if (arr_query['err_amazon_login'] == 1) {
+            $('p.errorAmazonLogin').show();
+        }
+    });
+
+    function getUrlVars() {
+        var vars = [], max = 0, hash = "", array = "";
+        var url = window.location.search;
+
+        //?を取り除くため、1から始める。複数のクエリ文字列に対応するため、&で区切る
+        hash  = url.slice(1).split('&');
+        max = hash.length;
+        for (var i = 0; i < max; i++) {
+            array = hash[i].split('=');    //keyと値に分割。
+            vars.push(array[0]);    //末尾にクエリ文字列のkeyを挿入。
+            vars[array[0]] = array[1];    //先ほど確保したkeyに、値を代入。
+        }
+
+        return vars;
+    }
+</script>
+
+<div class="d-none">
+    <div class="div_AmazonLogin">
+        <p class="ec-errorMessage errorAmazonLogin" style="display: none;">{{ 'amazon_pay.front_mypage_fail_to_login'|trans }}</p>
+        <p id="AmazonLoginButton" class="AmazonLoginButton"></p>
+    </div>
+</div>

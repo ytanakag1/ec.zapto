@@ -1,0 +1,8 @@
+<?php
+/*   __________________________________________________
+    |  Obfuscated by YAK Pro - Php Obfuscator  2.0.3   |
+    |              on 2020-11-16 14:57:02              |
+    |    GitHub: https://github.com/pk-fr/yakpro-po    |
+    |__________________________________________________|
+*/
+namespace Plugin\AmazonPay\Exception;class AmazonPaymentException extends \Exception{const UNDEFINED = false;const ZERO_PAYMENT = 101;const INVALID_PAYMENT_METHOD = 2;const AMAZON_REJECTED = 3;public static $errorMessages = array(self::ZERO_PAYMENT => 'amazon_pay.front.shopping.zero_payment_error', self::INVALID_PAYMENT_METHOD => 'Amazonアカウントでのお支払い選択において問題が発生しました。他の支払方法を選択するか、クレジットカード情報更新してください。', self::AMAZON_REJECTED => 'お支払い処理が失敗しました。他の支払い方法で再度購入してください。');public static $amazon_error_list = array('InvalidPaymentMethod' => self::INVALID_PAYMENT_METHOD, 'AmazonRejected' => self::AMAZON_REJECTED);public static function create(int $error_code){goto CBNhy;wVMFa:$message = self::$errorMessages[$error_code];goto kl2nU;B2uKd:yTB3D:goto hNnx2;RDd0Y:wJINX:goto Ib5Mm;Ib5Mm:return new self($message, $error_code);goto LY23K;hNnx2:$message = '予期しないエラーが発生しました。';goto RDd0Y;CBNhy:if (!array_key_exists($error_code, self::$errorMessages)) {goto yTB3D;}goto wVMFa;kl2nU:goto wJINX;goto B2uKd;LY23K:}public static function getErrorCode($reason_code){goto K29nC;hSiHV:return self::$amazon_error_list[$reason_code];goto MTgWU;NO19Z:XLxTI:goto hSiHV;gdq5w:return self::UNDEFINED;goto NO19Z;K29nC:if (array_key_exists($reason_code, self::$amazon_error_list)) {goto XLxTI;}goto gdq5w;MTgWU:}}

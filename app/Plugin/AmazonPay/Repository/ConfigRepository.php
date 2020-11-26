@@ -1,0 +1,8 @@
+<?php
+/*   __________________________________________________
+    |  Obfuscated by YAK Pro - Php Obfuscator  2.0.3   |
+    |              on 2020-11-16 14:57:02              |
+    |    GitHub: https://github.com/pk-fr/yakpro-po    |
+    |__________________________________________________|
+*/
+namespace Plugin\AmazonPay\Repository;use Eccube\Common\EccubeConfig;use Eccube\Repository\AbstractRepository;use Plugin\AmazonPay\Entity\Config;use Symfony\Bridge\Doctrine\RegistryInterface;class ConfigRepository extends AbstractRepository{public function __construct(EccubeConfig $eccubeConfig, RegistryInterface $registry){parent::__construct($registry, Config::class);$this->eccubeConfig = $eccubeConfig;}public function get($setting = false){goto H8PEp;wMCKf:$Config->setClientId($Config->getTestClientId());goto k_Rc_;dsgME:return $Config;goto u86_S;k_Rc_:lMtFd:goto dsgME;H8PEp:$Config = $this->find(1);goto xaGm5;c4M2E:$Config->setMwsAccessKeyId($this->eccubeConfig['amazon_pay']['test_account']['mws_access_key_id']);goto xuE3P;xuE3P:$Config->setMwsSecretAccessKey($this->eccubeConfig['amazon_pay']['test_account']['mws_secret_access_key']);goto wMCKf;stKJw:$Config->setSellerId($this->eccubeConfig['amazon_pay']['test_account']['seller_id']);goto c4M2E;xaGm5:if (!($setting === false && $Config->getAmazonAccountMode() == $this->eccubeConfig['amazon_pay']['account_mode']['shared'])) {goto lMtFd;}goto stKJw;u86_S:}}

@@ -1,0 +1,50 @@
+{#
+AmazonPay for EC-CUBE4
+Copyright(c) 2018 IPLOGIC CO.,LTD. All Rights Reserved.
+
+http://www.iplogic.co.jp/
+
+This program is not free software.
+It applies to terms of service.
+#}
+<div id="amazon-root"></div>
+<script type="text/javascript">
+    window.onAmazonLoginReady = function() {
+        amazon.Login.setClientId('{{ Config.client_id }}');
+    };
+    (function(d) {
+        var a = d.createElement('script');
+        a.type = 'text/javascript';
+        a.async = true;
+        a.id = 'amazon-login-sdk';
+        a.src = 'https://api-cdn.amazon.com/sdk/login1.js';
+        d.getElementById('amazon-root').appendChild(a);
+    })(document);
+</script>
+<script src="{{ AmazonApi.widget_url }}"></script>
+<script>
+    $(function() {
+        var authRequest;
+        var state = ["referrer_uri=" + location.href];
+
+        OffAmazonPayments.Button("AmazonLoginButton", "{{ Config.seller_id }}", {
+            type: "LwA",
+            size: "{{ Config.mypage_change_button_size }}",
+            color: "{{ Config.mypage_change_button_color }}",
+            authorization: function() {
+                {% set eccubePlatform = php_getenv('ECCUBE_PLATFORM') %}
+                {% if eccubePlatform and eccubePlatform == 'ec-cube.co' %}
+                    {% set url = url('homepage') ~ "html/user_data/amazon_login.html" %}
+                {% else %}
+                    {% set url = url('homepage') ~ "amazon_login.html" %}
+                {% endif %}
+                loginOptions = {scope: "profile payments:widget payments:shipping_address", popup: false, state: state};
+                authRequest = amazon.Login.authorize (loginOptions, "{{ url }}");
+            },
+            onError: function(error) {
+                alert('通信中にエラーが発生しました。ログイン画面に移動します。');
+                location.href = "{{ url('mypage_login') }}";
+            }
+        });
+    })
+</script>

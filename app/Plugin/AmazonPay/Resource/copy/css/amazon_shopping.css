@@ -1,0 +1,55 @@
+@media (max-width: 767px) {
+  #amazon_payWidget__address {
+    margin-top: 10px;
+    margin-bottom: 10px;
+  }
+
+  #amazon_payWidget__wallet {
+    margin-top: 10px;
+    margin-bottom: 10px;
+  }
+}
+
+@media (min-width: 768px) {
+  #amazon_payWidget__address {
+    float: left;
+    margin-left: 10px;
+    margin-right: 5px;
+  }
+
+  #amazon_payWidget__wallet {
+    margin-left: 5px;
+    margin-right: 10px;
+  }
+}
+
+.amazon_pay_button {
+  -moz-box-shadow: inset 0px 1px 0px 0px #f9eacf;
+  -webkit-box-shadow: inset 0px 1px 0px 0px #f9eacf;
+  box-shadow: inset 0px 1px 0px 0px #f9eacf;
+  background: -webkit-gradient(
+    linear,
+    left top,
+    left bottom,
+    color-stop(0.05, #f6dd9f),
+    color-stop(1, #f0c24d)
+  );
+  background: -moz-linear-gradient(center top, #f6dd9f 5%, #f0c24d 100%);
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#F6DD9F', endColorstr='#F0C24D');
+  background-color: #f5d78a;
+  border-color: #f5d78a;
+}
+
+.amazon_pay_button:hover {
+  background: -webkit-gradient(
+    linear,
+    left top,
+    left bottom,
+    color-stop(0.05, #f5d589),
+    color-stop(1, #eeba35)
+  );
+  background: -moz-linear-gradient(center top, #f5d589 5%, #eeba35 100%);
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#F5D589', endColorstr='#EEBA35');
+  background-color: #eeba35;
+  border-color: #eeba35;
+}

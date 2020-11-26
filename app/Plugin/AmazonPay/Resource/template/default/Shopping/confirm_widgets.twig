@@ -1,0 +1,123 @@
+{#
+AmazonPay for EC-CUBE4
+Copyright(c) 2018 IPLOGIC CO.,LTD. All Rights Reserved.
+
+http://www.iplogic.co.jp/
+
+This program is not free software.
+It applies to terms of service.
+#}
+{% block javascript %}
+<script>
+
+$(function () {
+    $('button.ec-blockBtn--action').addClass('amazon_pay_button');
+    
+    // submit
+    $('#shopping-form').attr('action', '{{ url("amazon_shopping_checkout") }}');
+
+    // back
+    $('.ec-blockBtn--cancel').attr('href', '{{ url("amazon_shopping") }}');
+    
+    // parameter
+    $('#amazonOrderReferenceId').prependTo($('#shopping-form'));
+    $('#addressConsentToken').prependTo($('#shopping-form'));
+
+    // header
+    $('#amazon_payWidgetHeader').replaceAll($('div.ec-orderRole__detail > div.ec-orderDelivery > div.ec-rectHeading'));
+    
+    // widget
+    $('div.ec-orderDelivery > div.ec-rectHeading').after($('#amazon_payWidget'));
+    
+    // deliv addr
+    $('div.ec-orderRole__detail > div.ec-orderDelivery > div.ec-orderDelivery__address').remove();
+
+    //スクロール処理上書き
+    $('.pagetop').hide();
+
+    $(window).on('scroll', function() {
+        // ページトップフェードイン
+        if ($(this).scrollTop() > 300) {
+            $('.pagetop').fadeIn();
+        } else {
+            $('.pagetop').fadeOut();
+        }
+
+        // PC表示の時のみに適用
+        if (window.innerWidth > 767) {
+
+            var side = $(".ec-orderRole__summary"),
+                wrap = $("#shopping-form"),
+                amazon_wrap = $('.amazon_customer_regist'),
+                min_move = wrap.offset().top,
+                max_move = wrap.height(),
+                amazon_move = amazon_wrap.height(),
+                margin_bottom = max_move - min_move;
+
+            var scrollTop = $(window).scrollTop();
+            if (scrollTop > min_move && scrollTop < max_move && amazon_move > 0) {
+                side.css({"margin-top": 0});
+            } else if (scrollTop > max_move) {
+                side.css({"margin-top": margin_bottom});
+            }
+        }
+    });
+});
+</script>
+
+<script>
+window.onAmazonLoginReady = function() { amazon.Login.setClientId("{{ Config.client_id }}"); };
+</script>
+<script type="text/javascript" src="{{ AmazonApi.widget_url }}"></script>
+<script>
+
+    var amazonOrderReferenceId;
+    new OffAmazonPayments.Widgets.AddressBook({
+        sellerId: "{{ Config.seller_id}}",
+        displayMode: "Read",
+        design: {
+            size : {width:"{{ Config.deliv_widget_width }}px", height:"185px"}
+        },
+        onError: function(error) {
+            alert("通信中にエラーが発生しました。カート画面に移動します。");
+            loadingOverlay();
+            location.href = "{{ url('cart') }}";
+        }
+    }).bind("addressBookWidgetDiv");
+
+    new OffAmazonPayments.Widgets.Wallet({
+        sellerId: "{{ Config.seller_id }}",
+        displayMode: "Read",
+        design: {
+            size : {width:"{{ Config.payment_widget_width }}", height:"185px"}
+        },
+        onError: function(error) {
+            alert("通信中にエラーが発生しました。カート画面に移動します。");
+            location.href = "{{ url('cart') }}";
+        }
+    }).bind("walletWidgetDiv");
+</script>
+{% endblock %}
+
+
+<div class="d-none">
+    <input type="hidden" name="amazonOrderReferenceId" id="amazonOrderReferenceId" value="{{ amazonOrderReferenceId }}" />
+    <input type="hidden" name="addressConsentToken" id="addressConsentToken" value="{{ addressConsentToken }}" />
+
+    <div id="amazon_payWidgetHeader" class="ec-rectHeading">
+        <h2>配送情報・お支払方法</h2>
+    </div>
+
+    <div id="amazon_payWidget">
+        <link rel="stylesheet" href="{{ asset('assets/css/amazon_shopping.css') }}">
+
+        <div id="amazon_payWidget__address">
+            <div class="ec-orderDelivery__title">お届け先</div>
+            <div id="addressBookWidgetDiv"></div>
+        </div>
+        <div id="amazon_payWidget__wallet">
+            <div class="ec-orderDelivery__title">お支払方法</div>
+            <div id="walletWidgetDiv"></div>
+        </div>
+    </div>
+</div>
